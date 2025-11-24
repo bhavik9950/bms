@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let template = document.getElementById("order-item-template");
 let items=document.querySelector('.item-num');    
 let itemCount = 0;
+if(addBtn){
     addBtn.addEventListener("click", function() {
         itemCount++;
         
@@ -18,9 +19,12 @@ let itemCount = 0;
        items.innerText="Items : "+ itemCount;
 
     });
-
+}
     // Add first item automatically
+  if (addBtn) {
     addBtn.click();
+}
+
     
 document.querySelectorAll(".file-upload-input").forEach(input => {
         input.addEventListener("change", function () {
