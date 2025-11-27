@@ -10,10 +10,15 @@ class RoleController extends Controller
 {
     //
 
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->wantsJson()) {
+            $roles = StaffRole::paginate(15);
+            return response()->json($roles);
+        }
+
+        // Web response
         // Fetch all roles (you can implement pagination if needed)
-       
         $roles = StaffRole::all();
         $active=StaffRole::where('status', true)->count();
         $total=StaffRole::count();

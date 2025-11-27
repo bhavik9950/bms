@@ -9,8 +9,18 @@ use App\Models\Relation;
 
 class RelationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->wantsJson()) {
+            $garments = Garment::with('measurements')->get();
+            $measurements = Measurements::all();
+            return response()->json([
+                'garments' => $garments,
+                'measurements' => $measurements
+            ]);
+        }
+
+        // Web response
         $garments = Garment::with('measurements')->get();
         $measurements = Measurements::all();
 
@@ -28,6 +38,14 @@ class RelationController extends Controller
 
         // This updates pivot table
         $garment->measurements()->sync($request->measurement_fields);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Relation saved successfully!',
+                'garment' => $garment->load('measurements')
+            ], 201);
+        }
 
         return back()->with('success', 'Relation saved successfully!');
     }
@@ -48,6 +66,14 @@ class RelationController extends Controller
 
         // This updates pivot table
         $garment->measurements()->sync($request->measurement_fields);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Relation updated successfully!',
+                'garment' => $garment->load('measurements')
+            ]);
+        }
 
         return back()->with('success', 'Relation updated successfully!');
     }

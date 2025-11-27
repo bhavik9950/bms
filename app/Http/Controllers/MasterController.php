@@ -14,8 +14,14 @@ class MasterController extends Controller
     /**
      * Display all garments
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->wantsJson()) {
+            $garments = Garment::paginate(15);
+            return response()->json($garments);
+        }
+
+        // Web response
         $garments = Garment::all();
         return view('dashboard.masters.index', compact('garments'));
     }
@@ -23,14 +29,30 @@ class MasterController extends Controller
     /**
      * Show create garment form (not used with modal AJAX but kept for REST consistency)
      */
-    public function create()
+    public function create(Request $request)
     {
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Use POST /masters to create garment']);
+        }
+
+        // Web response
         return view('dashboard.masters.create');
     }
 
     /**
      * Store a newly created garment (AJAX)
      */
+    public function show(Request $request, $id)
+    {
+        $garment = Garment::findOrFail($id);
+
+        if ($request->wantsJson()) {
+            return response()->json($garment);
+        }
+
+        return view('dashboard.masters.show', compact('garment'));
+    }
+
     public function store(Request $request)
     {
         try {
@@ -41,17 +63,32 @@ class MasterController extends Controller
 
             $garment = Garment::create($validated);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Garment created successfully!',
-                'garment' => $garment
-            ], 201);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Garment created successfully!',
+                    'garment' => $garment
+                ], 201);
+            }
+
+            return redirect()->route('dashboard.masters.index')->with('success', 'Garment created successfully!');
 
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $e->errors(),
-            ], 422);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            throw $e;
         }
     }
 
@@ -69,32 +106,62 @@ class MasterController extends Controller
             $garment = Garment::findOrFail($id);
             $garment->update($validated);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Garment updated successfully!',
-                'garment' => $garment
-            ], 200);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Garment updated successfully!',
+                    'garment' => $garment
+                ], 200);
+            }
+
+            return redirect()->route('dashboard.masters.index')->with('success', 'Garment updated successfully!');
 
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $e->errors(),
-            ], 422);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            throw $e;
         }
     }
 
     /**
      * Delete a garment
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $garment = Garment::findOrFail($id);
-        $garment->delete();
+        try {
+            $garment = Garment::findOrFail($id);
+            $garment->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Garment deleted successfully!'
-        ], 200);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Garment deleted successfully!'
+                ], 200);
+            }
+
+            return redirect()->route('dashboard.masters.index')->with('success', 'Garment deleted successfully!');
+
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred: ' . $e->getMessage()
+                ], 500);
+            }
+            throw $e;
+        }
     }
 
     /**

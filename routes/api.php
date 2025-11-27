@@ -2,6 +2,15 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\FabricController;
+use App\Http\Controllers\MasterController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RelationController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SalaryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +23,73 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Authentication routes (if not using web auth for API)
+Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
+Route::post('/register', [App\Http\Controllers\Auth\RegisteredUserController::class, 'store']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // User info
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // Authentication logout
+    Route::post('/logout', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy']);
+
+    // Orders API
+    Route::apiResource('orders', OrderController::class);
+
+    // Staff API
+    Route::apiResource('staff', StaffController::class);
+
+    // Fabrics API
+    Route::apiResource('fabrics', FabricController::class);
+
+    // Masters API (Garments)
+    Route::apiResource('masters', MasterController::class);
+
+    // Measurements API (part of masters)
+    Route::prefix('masters')->group(function () {
+        Route::get('/measurements', [MasterController::class, 'measurements']);
+        Route::post('/measurements', [MasterController::class, 'createMeasurements']);
+        Route::put('/measurements/{id}', [MasterController::class, 'updateMeasurements']);
+        Route::delete('/measurements/{id}', [MasterController::class, 'destroyMeasurements']);
+        Route::post('/import-measurements', [MasterController::class, 'importMeasurements']);
+        Route::post('/import-garments', [MasterController::class, 'importGarments']);
+    });
+
+    // Attendance API
+    Route::apiResource('attendance', AttendanceController::class);
+
+    // Dashboard API
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    // Relations API (Garment-Measurement relations)
+    Route::apiResource('relations', RelationController::class);
+    Route::get('/relations/measurements/{id}', [RelationController::class, 'getMeasurements']);
+
+    // Roles API
+    Route::apiResource('roles', RoleController::class);
+    Route::post('/roles/import', [RoleController::class, 'import']);
+
+    // Salary API
+    Route::apiResource('salary', SalaryController::class);
+    
+    // Additional specific routes for better API structure
+    Route::prefix('staff')->group(function () {
+        // Staff salary related routes
+        Route::get('/{id}/salary', [SalaryController::class, 'show']);
+        Route::post('/{id}/salary', [SalaryController::class, 'store']);
+    });
+
+    // Additional fabric specific routes
+    Route::prefix('fabrics')->group(function () {
+        Route::post('/import', [FabricController::class, 'importFabrics']);
+    });
+
+    // Additional order specific routes (if needed)
+    Route::prefix('orders')->group(function () {
+        // Add any order-specific API endpoints here
+        // For example: order statistics, order by status, etc.
+    });
 });

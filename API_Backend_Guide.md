@@ -75,7 +75,28 @@ class User extends Authenticatable
 
 Update controllers to detect request type and return appropriate responses. Use `request()->wantsJson()` or check for API routes.
 
-### Example: OrderController Update
+### Files to Modify:
+- `app/Http/Controllers/OrderController.php`
+- `app/Http/Controllers/StaffController.php` (partially done - needs index/create for API)
+- `app/Http/Controllers/FabricController.php` (partially done - needs index for API)
+- `app/Http/Controllers/MasterController.php`
+- `app/Http/Controllers/AttendanceController.php`
+- `app/Http/Controllers/DashboardController.php`
+- `app/Http/Controllers/RelationController.php`
+- `app/Http/Controllers/RoleController.php`
+- `app/Http/Controllers/SalaryController.php`
+
+### Key Changes Needed:
+1. Add `Request $request` parameter to methods that need it.
+2. Use `if ($request->wantsJson())` to differentiate API vs web responses.
+3. For API responses, return JSON with appropriate HTTP status codes.
+4. For web responses, keep existing view returns.
+5. Add proper validation and error handling for API requests.
+
+### Detailed Examples:
+
+#### OrderController.php
+Current state: Returns views, incomplete store method.
 
 ```php
 <?php
@@ -86,6 +107,7 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Garment;
 use App\Models\Fabric;
+use App\Models\Customer;
 
 class OrderController extends Controller
 {
@@ -93,7 +115,7 @@ class OrderController extends Controller
     {
         if ($request->wantsJson()) {
             // API response
-            $orders = Order::with(['customer', 'items'])->get();
+            $orders = Order::with(['customer', 'items.garment', 'items.fabric'])->paginate(15);
             return response()->json($orders);
         }
 
@@ -107,9 +129,11 @@ class OrderController extends Controller
             // API response - return necessary data
             $garments = Garment::all();
             $fabrics = Fabric::all();
+            $customers = Customer::all();
             return response()->json([
                 'garments' => $garments,
-                'fabrics' => $fabrics
+                'fabrics' => $fabrics,
+                'customers' => $customers
             ]);
         }
 
@@ -121,20 +145,21 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        // Validate request
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'items' => 'required|array',
+            'order_date' => 'required|date',
+            'status' => 'required|string',
+            'items' => 'required|array|min:1',
             'items.*.garment_id' => 'required|exists:garments,id',
             'items.*.fabric_id' => 'required|exists:fabrics,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
         ]);
 
-        // Create order logic
         $order = Order::create([
             'customer_id' => $validated['customer_id'],
-            'order_date' => now(),
-            'status' => 'pending',
+            'order_date' => $validated['order_date'],
+            'status' => $validated['status'],
         ]);
 
         foreach ($validated['items'] as $item) {
@@ -143,6 +168,7 @@ class OrderController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
+                'success' => true,
                 'message' => 'Order created successfully',
                 'order' => $order->load('items')
             ], 201);
@@ -150,10 +176,214 @@ class OrderController extends Controller
 
         return redirect()->route('dashboard.orders.index')->with('success', 'Order created successfully.');
     }
+
+    public function show(Request $request, $id)
+    {
+        $order = Order::with(['customer', 'items.garment', 'items.fabric'])->findOrFail($id);
+
+        if ($request->wantsJson()) {
+            return response()->json($order);
+        }
+
+        return view('dashboard.orders.show', compact('order'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'order_date' => 'required|date',
+            'status' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.garment_id' => 'required|exists:garments,id',
+            'items.*.fabric_id' => 'required|exists:fabrics,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
+        ]);
+
+        $order->update($validated);
+        $order->items()->delete(); // Remove existing items
+        foreach ($validated['items'] as $item) {
+            $order->items()->create($item);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order updated successfully',
+                'order' => $order->load('items')
+            ]);
+        }
+
+        return redirect()->route('dashboard.orders.index')->with('success', 'Order updated successfully.');
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+        $order->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order deleted successfully'
+            ]);
+        }
+
+        return redirect()->route('dashboard.orders.index')->with('success', 'Order deleted successfully.');
+    }
 }
 ```
 
-Apply similar patterns to other controllers (StaffController, FabricController, etc.).
+#### StaffController.php
+Current state: index/create return views, store/destroy return JSON.
+
+Add API support to index and create methods:
+
+```php
+public function index(Request $request)
+{
+    if ($request->wantsJson()) {
+        $staff = Staff::with(['role', 'salary'])->paginate(15);
+        return response()->json($staff);
+    }
+
+    // Existing web code
+    $staff = Staff::with(['role', 'salary'])->get();
+    $stf = Staff::all();
+    $total = $stf->count();
+    $activeStaff = $stf->where('status', 1)->count();
+    $inactiveStaff = $stf->where('status', 0)->count();
+    return view('dashboard.staff.index', compact('staff', 'stf', 'total', 'activeStaff', 'inactiveStaff'));
+}
+
+public function create(Request $request)
+{
+    if ($request->wantsJson()) {
+        $roles = StaffRole::all();
+        return response()->json(['roles' => $roles]);
+    }
+
+    // Existing web code
+    $roles = StaffRole::all();
+    return view('dashboard.staff.create', compact('roles'));
+}
+
+public function show(Request $request, $id)
+{
+    $staff = Staff::with(['role', 'salary'])->findOrFail($id);
+
+    if ($request->wantsJson()) {
+        return response()->json($staff);
+    }
+
+    return view('dashboard.staff.show', compact('staff'));
+}
+
+public function update(Request $request, $id)
+{
+    $staff = Staff::findOrFail($id);
+
+    $validated = $request->validate([
+        'full_name' => 'required|string|max:255',
+        'phone' => 'required|string|max:20',
+        'email' => 'nullable|email|max:255|unique:staff,email,' . $id,
+        'role_id' => 'required|exists:staff_roles,id',
+        'joining_date' => 'required|date',
+        'address' => 'required|string|max:500',
+        'shift_start_time' => 'required|string',
+        'shift_end_time' => 'required|string',
+        'status' => 'required|boolean',
+        'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'id_proof' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    // Handle file uploads
+    if ($request->hasFile('profile_picture')) {
+        $validated['profile_picture'] = $request->file('profile_picture')->store('profiles', 'public');
+    }
+
+    if ($request->hasFile('id_proof')) {
+        $validated['id_proof'] = $request->file('id_proof')->store('id_proofs', 'public');
+    }
+
+    $staff->update($validated);
+
+    if ($request->wantsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Staff updated successfully',
+            'staff' => $staff->load('role', 'salary')
+        ]);
+    }
+
+    return redirect()->route('dashboard.staff.index')->with('success', 'Staff updated successfully.');
+}
+```
+
+#### FabricController.php
+Current state: index returns view, other methods return JSON.
+
+Update index method:
+
+```php
+public function index(Request $request)
+{
+    if ($request->wantsJson()) {
+        $fabrics = Fabric::paginate(15);
+        return response()->json($fabrics);
+    }
+
+    // Existing web code
+    $fabrics = Fabric::all();
+    return view('dashboard.masters.fabrics', compact('fabrics'));
+}
+
+public function show(Request $request, $id)
+{
+    $fabric = Fabric::findOrFail($id);
+
+    if ($request->wantsJson()) {
+        return response()->json($fabric);
+    }
+
+    return view('dashboard.masters.fabric-detail', compact('fabric'));
+}
+
+public function update(Request $request, $id)
+{
+    $fabric = Fabric::findOrFail($id);
+
+    $validated = $request->validate([
+        'fabric' => 'required|string|max:255',
+        'description' => 'nullable|string',
+    ]);
+
+    $fabric->update($validated);
+
+    if ($request->wantsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Fabric updated successfully',
+            'fabric' => $fabric
+        ]);
+    }
+
+    return redirect()->route('dashboard.masters.fabrics')->with('success', 'Fabric updated successfully.');
+}
+```
+
+### Pattern for Other Controllers:
+For each controller, follow this pattern:
+1. Add `Request $request` to methods that need API support
+2. Wrap API logic in `if ($request->wantsJson())`
+3. Return JSON responses with consistent structure: `{'success': true/false, 'message': '...', 'data': ...}`
+4. Keep existing web logic for non-API requests
+5. Add missing CRUD methods (show, update) if needed
+6. Add proper validation for all API endpoints
+7. Use pagination for index methods to handle large datasets
 
 ## Step 4: Add API Routes
 
