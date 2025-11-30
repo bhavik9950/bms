@@ -2,6 +2,11 @@ import { getCsrfToken } from './main.js';
 
 const DEFAULT_IMG = "https://avatar.iran.liara.run/public"; //  placeholder
 
+// Function to handle edit staff button click
+window.editStaff = function(staff) {
+    window.location.href = `/dashboard/staff/edit/${staff.id}`;
+};
+
 // Helper function to convert DD-MM-YYYY or DD-MM-YY to YYYY-MM-DD
 function convertDateFormat(dateString) {
     if (!dateString) return '';
@@ -97,13 +102,15 @@ document.querySelectorAll(".staff-id-upload-input").forEach(input => {
 // Form Submission Handling
 document.addEventListener('DOMContentLoaded', () => {
     const staffForm = document.getElementById('staff-info');
+    console.log('Staff form found:', staffForm);
     if (!staffForm) return;
     
     let submitting = false;
 
     staffForm.addEventListener('submit', async function (e) {
+        console.log('Form submit triggered', e.target.action);
         e.preventDefault();
-        
+
         if (submitting) return;
         submitting = true;
 
@@ -159,13 +166,14 @@ for (let [key, value] of formData.entries()) {
                 formData.delete('photo');
             }
             
-            const url = `/dashboard/staff/store`;
-            
+            const url = staffForm.action;
+            const method = staffForm.method || 'POST';
+
             const res = await fetch(url, {
-                method: 'POST',
-                headers: { 
-                    'X-CSRF-TOKEN': getCsrfToken(), 
-                    'Accept': 'application/json' 
+                method: method,
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
                 },
                 body: formData,
             });
@@ -179,23 +187,32 @@ console.log("📥 Server Response:", data);
             }
 
             // Handle success
-            Swal.fire('Success!', 'Staff member saved successfully!', 'success');
-            staffForm.reset();
-            
-            // Reset profile preview
-            const profilePreview = document.getElementById('profilePreview');
-            if (profilePreview) {
-                profilePreview.src = DEFAULT_IMG;
+            const successMessage = data.message || 'Staff member saved successfully!';
+          
+  Swal.fire('Success!', successMessage, 'success').then(() => {
+                // Redirect to staff list
+                window.location.href = '/dashboard/staff';
+            });
+
+            // Only reset form if it's create (store), not update
+            if (url.includes('/store')) {
+                staffForm.reset();
+
+                // Reset profile preview
+                const profilePreview = document.getElementById('profilePreview');
+                if (profilePreview) {
+                    profilePreview.src = DEFAULT_IMG;
+                }
+
+                // Reset file name displays
+                document.querySelectorAll('.file-name, .file-name-id').forEach(span => {
+                    span.textContent = '';
+                    span.classList.add('hidden');
+                });
+                document.querySelectorAll('.upload-instructions, .upload-instructions-id').forEach(div => {
+                    div.classList.remove('hidden');
+                });
             }
-            
-            // Reset file name displays
-            document.querySelectorAll('.file-name, .file-name-id').forEach(span => {
-                span.textContent = '';
-                span.classList.add('hidden');
-            });
-            document.querySelectorAll('.upload-instructions, .upload-instructions-id').forEach(div => {
-                div.classList.remove('hidden');
-            });
 
         } catch (error) {
             console.error('Error saving staff:', error);
@@ -209,3 +226,6 @@ console.log("📥 Server Response:", data);
         }
     });
 });
+
+
+// Edit Staff member 

@@ -27,6 +27,8 @@ import './fetch-garment.js';
 import './audio.js';
 import './roles.js';
 import './staff.js';
+import './salary.js';
+
 // Alpine setup
 Alpine.plugin(collapse);
 Alpine.plugin(mask);

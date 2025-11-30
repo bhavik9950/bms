@@ -102,6 +102,7 @@ class StaffController extends Controller
     }
 }
 
+
 public function show(Request $request, $id)
 {
     $staff = Staff::with(['role', 'salary'])->findOrFail($id);
@@ -113,6 +114,20 @@ public function show(Request $request, $id)
     return view('dashboard.staff.show', compact('staff'));
 }
 
+// Edit staff member
+public function edit(Request $request, $id){
+    $staff = Staff::findOrFail($id);
+    $roles = StaffRole::all();
+    if ($request->wantsJson()) {
+        return response()->json([
+            'staff' => $staff,
+            'roles' => $roles
+        ]);
+    }
+    return view('dashboard.staff.edit', compact('staff', 'roles'));
+}
+
+// Update staff member
 public function update(Request $request, $id)
 {
     try {
@@ -127,6 +142,7 @@ public function update(Request $request, $id)
             'address' => 'required|string|max:500',
             'shift_start_time' => 'required|string',
             'shift_end_time' => 'required|string',
+            'base_salary' => 'required|numeric|min:0',
             'status' => 'required|boolean',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'id_proof' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -142,6 +158,18 @@ public function update(Request $request, $id)
         }
 
         $staff->update($validated);
+
+        // Update or create salary
+        if ($staff->salary) {
+            $staff->salary()->update(['base_salary' => $validated['base_salary']]);
+        } else {
+            Salary::create([
+                'staff_id' => $staff->id,
+                'base_salary' => $validated['base_salary'],
+                'amount_paid' => 0,
+                'pending_amount' => $validated['base_salary'],
+            ]);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -173,6 +201,7 @@ public function update(Request $request, $id)
     }
 }
 
+// Delete staff member
 public function destroy($id)
     {
         $staff = Staff::findOrFail($id);

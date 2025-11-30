@@ -1,6 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Sallery Management')
 @section('content')
+<style>
+#payForm select {
+    background-color: white !important;
+}
+</style>
+
 <div class="container mx-auto py-2 px-2">
     <div class="flex items-center justify-between mb-6">
         {{-- Header Title --}}
@@ -129,44 +135,120 @@
             </tr>
         </thead>
         <tbody>
-           {{-- @foreach($stf as $s)
-<tr id="row-{{ $s->id }}" class="bg-white border-b text-center">
-   <td class="px-6 py-4 col-full-name flex items-center">
-  <img id="profilePreview" class="w-10 h-10 p-1 rounded-full ring-1 ring-gray-300 dark:ring-gray-500 mr-2"
-       src="{{ $s->profile_picture ? asset('storage/' . $s->profile_picture) : "https://avatar.iran.liara.run/public" }}" alt="Bordered avatar">
-  <span>{{ $s->full_name }}</span>
+           @foreach($salaries as $salary)
+<tr id="row-{{ $salary->staff->id }}" class="bg-white border-b text-center">
+   <td class="px-6 py-4">{{ $salary->staff->staff_code }}</td>
+   <td class="px-6 py-4 col-full-name flex items-center justify-center">
+  <img class="w-10 h-10  rounded-full ring-1 ring-gray-300 dark:ring-gray-500 mr-2"
+       src="{{ $salary->staff->profile_picture ? asset('storage/' . $salary->staff->profile_picture) : "https://avatar.iran.liara.run/public" }}" alt="Bordered avatar">
+  <span>{{ $salary->staff->full_name }}</span>
 </td>
 
-    <td class="px-6 py-4 col-phone">{{ $s->phone }}</td>
-    <td class="px-6 py-4 col-role">{{ $s->role->role }}</td>
-      <td class="px-6 py-4 col-shift">{{ $s->shift_start_time }} AM -{{$s->shift_end_time}} PM</td>
-      <td class="px-6 py-4 col-salary">{{ $s->salary }}</td>
-       <td class="px-6 py-4 col-status user-select-none">
-    @if($s->status == 1)
-        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">Active</span>
-    @else
-        <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-600">Inactive</span>
-    @endif
-</td>
-
-      <td class="px-6 py-4 text-center">
-        <button onclick='editStaff(@json($s))'
-            class="text-white btn bg-green-500 hover:bg-green-600 rounded-lg px-5 border-none">
-            <i class="ti ti-edit"></i>
+    <td class="px-6 py-4 col-role">{{ $salary->staff->role->role }}</td>
+      <td class="px-6 py-4">₹{{ number_format($salary->base_salary) }}</td>
+      <td class="px-6 py-4">₹{{ number_format($salary->pending_amount) }}</td>
+      <td class="px-6 py-4">
+        <button class="text-white btn bg-green-500 hover:bg-green-600 rounded-lg px-3 py-1 border-0"id="pay-button-{{ $salary->staff->id }}"  onclick="document.getElementById('my_modal_1').showModal();">
+            <i class="ti ti-cash"></i> Pay
         </button>
-       <button data-id="{{ $s->id }}" 
-        onclick="deleteStaff('{{ $s->id }}')" 
-        class="text-white delete-staff-btn btn bg-red-500 hover:bg-red-700 rounded-lg px-5 ml-2 border-none">
-    <i class="ti ti-trash"></i>
-</button>
-
+      </td>
+      <td class="px-6 py-4 text-center">
+        <a href="{{ route('dashboard.staff.salary.view', $salary->staff->id) }}"
+            class="text-white btn bg-gray-400 hover:bg-gray-600 rounded-lg px-3 py-1 border-0">
+            <p>View History</p>
+        </a>
     </td>
 </tr>
-@endforeach --}}
+@endforeach
 
         </tbody>
     </table>
 
 </div>
 </div>
+
+{{-- Add Payment Modal --}}
+<dialog id="my_modal_1" class="modal">
+    <div class="modal-box bg-white text-gray-800 rounded-2xl shadow-xl w-full max-w-xl p-6 relative">
+
+        {{-- Close Button --}}
+        <button type="button"
+            onclick="document.getElementById('my_modal_1').close()"
+            class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3">✕</button>
+
+        {{-- Title --}}
+        <h3 class="text-2xl font-semibold mb-6">Add Payment</h3>
+
+        <form id="payForm" class="space-y-6">
+            @csrf
+            <input type="hidden" id="staff-id" name="id">
+
+            {{-- Total Paid + Balance --}}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Total Paid</label>
+                    <input type="text" id="total_paid" name="total_paid" placeholder="0"
+                        class="w-full input  input-bordered rounded-xl focus:ring-2 focus:ring-green-400 text-gray-700  bg-white" readonly >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Balance</label>
+                    <input type="text" id="balance" name="balance" placeholder="0"
+                        class="w-full input  bg-white input-bordered rounded-xl focus:ring-2 focus:ring-green-400 bg-gray-100 cursor-not-allowed text-gray-700"
+                    readonly>
+                </div>
+            </div>
+
+            {{-- Amount Being Paid Now --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Amount Being Paid Now</label>
+                <input type="text" id="amount" name="amount" placeholder="1000"
+                    class="input input-bordered  bg-white w-full rounded-xl focus:ring-2 focus:ring-green-400 text-gray-800">
+            </div>
+
+            {{-- Payment Date --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Payment Date</label>
+                <div class="relative">
+                    <input type="date" id="payment_date" name="payment_date"
+                        class="input  bg-white input-bordered w-full rounded-xl focus:ring-2 focus:ring-green-400">
+                </div>
+            </div>
+
+            {{-- Payment Method --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Payment Method</label>
+                <select id="payment_method" name="payment_method"
+                    class="input input-bordered  bg-white w-full rounded-xl focus:ring-2 focus:ring-green-400">
+                    <option value="" class="bg-white" selected disabled>Select payment method</option>
+                    <option value="cash">Cash</option>
+                    <option value="online">Online</option>
+                    <option value="upi">UPI</option>
+                </select>
+            </div>
+
+            {{-- Notes --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Notes (Optional)</label>
+                <textarea id="notes" name="notes" rows="3"
+                    class="textarea textarea-bordered w-full bg-white rounded-xl focus:ring-2 focus:ring-green-400"></textarea>
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex justify-end gap-3 pt-6 border-t">
+                <button type="button"
+                    onclick="document.getElementById('my_modal_1').close()"
+                    class="btn bg-gray-200 text-gray-700 hover:bg-gray-300 border-none rounded-lg px-6">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                    class="btn bg-green-500 text-white hover:bg-green-600 border-none rounded-lg px-6">
+                    Save Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
 @endsection

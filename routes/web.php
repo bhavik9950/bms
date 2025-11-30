@@ -36,7 +36,7 @@ Route::prefix('dashboard')->middleware(['auth', 'verified'])->group(function () 
 // Master routes
 Route::prefix('dashboard')->middleware(['auth', 'verified'])->group(function () {
     Route::resource('masters', MasterController::class)
-        ->except(['show']) // 👈 exclude "show" since we don’t need it
+        ->except(['show']) 
         ->names([
             'index'   => 'dashboard.masters',
             'create'  => 'dashboard.masters.create',
@@ -88,9 +88,12 @@ Route::prefix('dashboard/masters')->middleware(['auth', 'verified'])->group(func
 Route::prefix('dashboard/staff')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [StaffController::class, 'index'])->name('dashboard.staff');
     Route::get('/create', [StaffController::class, 'create'])->name('dashboard.staff.create');
+      Route::get('/edit/{id}', [StaffController::class, 'edit'])->name('dashboard.staff.edit');
+    Route::put('/edit/{id}', [StaffController::class, 'update'])->name('dashboard.staff.update');
     Route::post('/store', [StaffController::class, 'store'])->name('dashboard.staff.store');
     Route::delete('/delete/{id}', [StaffController::class, 'destroy'])->name('dashboard.staff.destroy');
-   Route::get('/salary', [SalaryController::class, 'index'])->name('dashboard.staff.salary'); 
+   Route::get('/salary', [SalaryController::class, 'index'])->name('dashboard.staff.salary');
+   Route::get('/salary/{id}', [SalaryController::class, 'show'])->name('dashboard.staff.salary.view');
 });
 
 // Roles management routes
@@ -109,3 +112,4 @@ Route::prefix('dashboard/attendance')->middleware(['auth', 'verified'])->group(f
 });
 
 require __DIR__.'/auth.php';
+

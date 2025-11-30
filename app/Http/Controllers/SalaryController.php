@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Staff;
 use App\Models\StaffRole;
-use Illuminate\Http\Request;    
+use App\Models\Salary;
+use Illuminate\Http\Request;
 class SalaryController extends Controller
 {
     //
@@ -12,13 +13,14 @@ class SalaryController extends Controller
     {
         if ($request->wantsJson()) {
             // API response - return salary data
-            $roles = StaffRole::all();
-            return response()->json(['roles' => $roles]);
+            $salaries = Salary::with('staff.role')->get();
+            return response()->json(['salaries' => $salaries]);
         }
 
         // Web response
-        $roles=StaffRole::all();
-        return view('dashboard.staff.salary.index',compact('roles'));
+        $salaries = Salary::with('staff.role')->get();
+        $roles = StaffRole::all();
+        return view('dashboard.staff.salary.index', compact('salaries', 'roles'));
     }
 
     public function store(Request $request)
@@ -35,13 +37,17 @@ class SalaryController extends Controller
 
     public function show(Request $request, $id)
     {
+        $staff = Staff::with('role')->findOrFail($id);
+        $salary = Salary::where('staff_id', $id)->first();
+
         if ($request->wantsJson()) {
             // Return salary details for specific staff
             return response()->json([
-                'message' => 'Salary details API endpoint'
+                'staff' => $staff,
+                'salary' => $salary
             ]);
         }
 
-        return view('dashboard.staff.salary.show');
+        return view('dashboard.staff.salary.view', compact('staff', 'salary'));
     }
 }

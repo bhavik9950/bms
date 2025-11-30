@@ -54,8 +54,9 @@
                 </div>
 
                 <!-- Login Button -->
-                <button type="submit" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">
-                    Login
+                <button type="submit" id="login-btn" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center">
+                    <span id="login-text">Login</span>
+                    <span id="login-loader" class="hidden loading loading-spinner loading-sm ml-2"></span>
                 </button>
             </form>
         </div>
@@ -67,4 +68,25 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const loginBtn = document.getElementById('login-btn');
+    const loginText = document.getElementById('login-text');
+    const loginLoader = document.getElementById('login-loader');
+
+    form.addEventListener('submit', function() {
+        // Disable button
+        loginBtn.disabled = true;
+
+        // Show loader and hide text
+        loginText.classList.add('hidden');
+        loginLoader.classList.remove('hidden');
+
+        // Change button text to loading
+        loginText.textContent = 'Logging in...';
+    });
+});
+</script>
 </x-botique>

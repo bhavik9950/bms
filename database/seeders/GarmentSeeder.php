@@ -9,8 +9,6 @@ class GarmentSeeder extends Seeder
 {
     public function run()
     {
-        
-
         $garments = [
             ['name' => 'T-Shirt', 'description' => 'Casual cotton t-shirt, available in various colors.'],
             ['name' => 'Jeans', 'description' => 'Denim jeans with slim fit design.'],
@@ -24,6 +22,10 @@ class GarmentSeeder extends Seeder
             ['name' => 'Hoodie', 'description' => 'Fleece hoodie with front pocket.'],
         ];
 
-        Garment::insert($garments);
+        foreach ($garments as $garment) {
+            if (!Garment::where('name', $garment['name'])->exists()) {
+                Garment::create($garment);
+            }
+        }
     }
 }
