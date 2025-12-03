@@ -11,19 +11,31 @@
         </div>
 
         <div class="flex space-x-2">
-            <button class="bg-green-400 hover:bg-green-600 text-white px-4 py-2 rounded-md">
+            <a href="{{ route('dashboard.attendance.mark') }}" class="bg-green-400 hover:bg-green-600 text-white px-4 py-2 rounded-md">
                 <i class="ti ti-plus mr-2"></i>
                 Mark Attendance
-            </button>
+            </a>
+              <a href="{{ route('dashboard.attendance.monthly') }}" class="bg-gray-400 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+                <i class="ti ti-trending-up mr-2"></i>
+                Monthly Reports
+            </a>
         </div>
     </div>
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 mb-6">
+        <div class="bg-white p-4 pt-3 rounded-lg shadow">
+            <h2 class="text-lg font-medium mb-1">Total Staff</h2>
+            <div class="flex items-center justify-between mt-4">
+                <p class="text-2xl font-medium text-blue-400">15</p>
+                <i class="ti ti-users text-3xl text-blue-400 px-4 py-2 bg-blue-50 rounded-lg"></i>
+            </div>
+        </div>
+
         <div class="bg-white p-4 pt-3 rounded-lg shadow">
             <h2 class="text-lg font-medium mb-1">Present Today</h2>
             <div class="flex items-center justify-between mt-4">
-                <p class="text-2xl font-medium text-green-400">15</p>
+                <p class="text-2xl font-medium text-green-400">10</p>
                 <i class="ti ti-user-check text-3xl text-green-400 px-4 py-2 bg-green-50 rounded-lg"></i>
             </div>
         </div>
@@ -31,63 +43,45 @@
         <div class="bg-white p-4 pt-3 rounded-lg shadow">
             <h2 class="text-lg font-medium mb-1">Absent Today</h2>
             <div class="flex items-center justify-between mt-4">
-                <p class="text-2xl font-medium text-red-400">3</p>
-                <i class="ti ti-user-x text-3xl text-red-400 px-4 py-2 bg-red-50 rounded-lg"></i>
+                <p class="text-2xl font-medium text-red-400">2</p>
+                <i class="ti ti-alert-triangle text-3xl text-red-400 px-4 py-2 bg-red-50 rounded-lg"></i>
             </div>
         </div>
 
         <div class="bg-white p-4 pt-3 rounded-lg shadow">
-            <h2 class="text-lg font-medium mb-1">Late Arrivals</h2>
+            <h2 class="text-lg font-medium mb-1">Half Day</h2>
             <div class="flex items-center justify-between mt-4">
                 <p class="text-2xl font-medium text-yellow-400">2</p>
                 <i class="ti ti-clock text-3xl text-yellow-400 px-4 py-2 bg-yellow-50 rounded-lg"></i>
             </div>
         </div>
-
-        <div class="bg-white p-4 pt-3 rounded-lg shadow">
-            <h2 class="text-lg font-medium mb-1">Total Staff</h2>
+         <div class="bg-white p-4 pt-3 rounded-lg shadow">
+            <h2 class="text-lg font-medium mb-1">Leave</h2>
             <div class="flex items-center justify-between mt-4">
-                <p class="text-2xl font-medium text-blue-400">18</p>
-                <i class="ti ti-users text-3xl text-blue-400 px-4 py-2 bg-blue-50 rounded-lg"></i>
+                <p class="text-2xl font-medium text-gray-400">1</p>
+                <i class="ti ti-heart text-3xl text-gray-400 px-4 py-2 bg-gray-50 rounded-lg"></i>
             </div>
         </div>
     </div>
 
-    {{-- Filters --}}
-    <div class="bg-white flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg shadow mb-6">
-        <!-- Date Picker -->
-        <div class="flex items-center gap-2">
-            <label class="text-sm font-medium text-gray-600">Date:</label>
-            <input type="date" id="attendance-date"
-                class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring focus:border-indigo-400">
+    {{-- Today's Attendance Progress --}}
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">Today's Attendance Rate</h3>
+                <h5 class="text-sm p-2 text-gray-500">{{ $currentDate }}</h5>
+            </div>
+            <span class="text-2xl font-bold text-green-600">{{ $presentPercentage }}%</span>
         </div>
-
-        <!-- Role Filter -->
-        <div>
-            <select id="role-filter"
-                class="border border-gray-300 py-2 px-3 rounded-md text-gray-700 focus:outline-none focus:ring focus:border-indigo-400">
-                <option value="all">All Roles</option>
-                <option value="tailor">Tailor</option>
-                <option value="master">Master</option>
-                <option value="stitcher">Stitcher</option>
-            </select>
+    
+        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+            <div class="bg-green-500 h-4 rounded-full transition-all duration-300 ease-in-out"
+                 style="width: {{ $presentPercentage }}%"></div>
         </div>
-
-        <!-- Search -->
-        <div class="relative flex-1 min-w-[200px]">
-            <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input type="text" placeholder="Search staff..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-indigo-400">
-        </div>
-
-        <!-- Bulk Actions -->
-        <div class="flex gap-2">
-            <button class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600">
-                Mark All Present
-            </button>
-            <button class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600">
-                Mark All Absent
-            </button>
+    
+        <div class="flex justify-end text-sm text-gray-600">
+            <span>{{ $presentCount }} Present </span>
+            <span class="pl-2">{{ $totalStaff }} Total Staff</span>
         </div>
     </div>
 
@@ -98,10 +92,10 @@
                 <tr class="text-center">
                     <th class="px-6 py-3">Staff</th>
                     <th class="px-6 py-3">Role</th>
+                     <th class="px-6 py-3">Shift</th>
                     <th class="px-6 py-3">Check In</th>
                     <th class="px-6 py-3">Check Out</th>
                     <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3">Hours</th>
                     <th class="px-6 py-3">Actions</th>
                 </tr>
             </thead>

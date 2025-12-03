@@ -27,6 +27,7 @@
     "dependencies": {
         "@alpinejs/collapse": "^3.14.9",
         "@alpinejs/mask": "^3.14.9",
+        "@fortawesome/fontawesome-free": "^7.1.0",
         "@tabler/icons-webfont": "^3.34.1",
         "@tailwindcss/postcss": "^4.1.12",
         "@tailwindcss/vite": "^4.1.12",

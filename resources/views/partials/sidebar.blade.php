@@ -82,11 +82,14 @@
           <svg :class="{'rotate-90': openDropdown==='attendance'}" class="ml-auto h-4 w-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
         </button>
         <div x-show="openDropdown==='attendance'" class="pl-8 space-y-1" x-cloak>
-          <a href="{{ route('dashboard.attendance') }}" class="block py-1 hover:text-green-700
-          {{request()->routeIs('dashboard.attendance')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-users mr-2"></i>Staff Attendance</a>
-          <a href="#" class="block py-1 hover:text-green-700"><i class="ti ti-checkbox mr-2"></i>Mark Attendance</a>
-          <a href="#" class="block py-1 hover:text-green-700"><i class="ti ti-calendar mr-2"></i>View by Date</a>
-          <a href="#" class="block py-1 hover:text-green-700"><i class="ti ti-calendar-cog mr-2"></i>Monthly Summary</a>
+          <a href="{{ route('dashboard.attendance.index') }}" class="block py-1 hover:text-green-700
+          {{request()->routeIs('dashboard.attendance.index')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-users mr-2"></i>Staff Attendance</a>
+          <a href="{{ route('dashboard.attendance.mark') }}" class="block py-1 hover:text-green-700
+          {{request()->routeIs('dashboard.attendance.mark')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-checkbox mr-2"></i>Mark Attendance</a>
+          <a href="{{ route('dashboard.attendance.date') }}" class="block py-1 hover:text-green-700
+          {{request()->routeIs('dashboard.attendance.date')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-calendar mr-2"></i>View by Date</a>
+          <a href="{{ route('dashboard.attendance.monthly') }}" class="block py-1 hover:text-green-700
+          {{request()->routeIs('dashboard.attendance.monthly')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-calendar-cog mr-2"></i>Monthly Summary</a>
         </div>
       </div>
       {{-- Roles --}}

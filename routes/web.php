@@ -96,6 +96,14 @@ Route::prefix('dashboard/staff')->middleware(['auth', 'verified'])->group(functi
    Route::get('/salary/{id}', [SalaryController::class, 'show'])->name('dashboard.staff.salary.view');
 });
 
+// Attendance routes
+Route::prefix('dashboard/attendance')->middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', [AttendanceController::class, 'index'])->name('dashboard.attendance.index');
+    Route::get('/mark', [AttendanceController::class, 'mark'])->name('dashboard.attendance.mark');
+    Route::get('/date', [AttendanceController::class, 'date'])->name('dashboard.attendance.date');
+    Route::get('/monthly', [AttendanceController::class, 'monthly'])->name('dashboard.attendance.monthly');
+});
+
 // Roles management routes
 Route::prefix('dashboard/roles')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('dashboard.roles');
@@ -105,11 +113,6 @@ Route::prefix('dashboard/roles')->middleware(['auth', 'verified'])->group(functi
     Route::delete('/{id}', [RoleController::class, 'destroy'])->name('dashboard.roles.destroy');
 });
 
-// Attendence routes
-Route::prefix('dashboard/attendance')->middleware(['auth', 'verified'])->group(function () {
-    Route::get('/', [AttendanceController::class, 'index'])->name('dashboard.attendance');
-    
-});
 
 require __DIR__.'/auth.php';
 
