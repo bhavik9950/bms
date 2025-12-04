@@ -17,11 +17,39 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
+   protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'is_active'
     ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    // Helper methods for roles
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isTechnicalAdmin()
+    {
+        return $this->role === 'technical_admin';
+    }
+
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.
