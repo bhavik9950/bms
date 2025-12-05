@@ -102,6 +102,13 @@ Route::prefix('dashboard/attendance')->middleware(['auth', 'verified'])->group(f
     Route::get('/mark', [AttendanceController::class, 'mark'])->name('dashboard.attendance.mark');
     Route::get('/date', [AttendanceController::class, 'date'])->name('dashboard.attendance.date');
     Route::get('/monthly', [AttendanceController::class, 'monthly'])->name('dashboard.attendance.monthly');
+    Route::get('/checkInOut', [AttendanceController::class, 'checkInOut'])->name('dashboard.attendance.checkInOut');
+    Route::get('/status', [AttendanceController::class, 'status'])->name('dashboard.attendance.status');
+    Route::get('/history', [AttendanceController::class, 'history'])->name('dashboard.attendance.history');
+    Route::get('/statusUpdate', [AttendanceController::class, 'statusUpdate'])->name('dashboard.attendance.statusUpdate');
+    Route::get('/break', [AttendanceController::class, 'break'])->name('dashboard.attendance.break');
+    Route::get('/geofence', [AttendanceController::class, 'geofence'])->name('dashboard.attendance.geofence');
+    Route::get('/earlyCheckout', [AttendanceController::class, 'earlyCheckout'])->name('dashboard.attendance.earlyCheckout');
 });
 
 // Roles management routes

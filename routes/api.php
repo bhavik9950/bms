@@ -36,6 +36,20 @@ Route::middleware('auth:sanctum')->group(function () {
     // Authentication logout
     Route::post('/logout', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy']);
 
+    // V1 API routes for mobile app compatibility
+    Route::prefix('V1')->group(function () {
+        // Attendance API endpoints for mobile app
+        Route::prefix('attendance')->group(function () {
+            Route::post('/checkInOut', [AttendanceController::class, 'apiCheckInOut']);
+            Route::get('/checkStatus', [AttendanceController::class, 'apiCheckStatus']);
+            Route::get('/getHistory', [AttendanceController::class, 'apiGetHistory']);
+            Route::post('/statusUpdate', [AttendanceController::class, 'apiStatusUpdate']);
+            Route::post('/startStopBreak', [AttendanceController::class, 'apiStartStopBreak']);
+            Route::post('/validateGeoLocation', [AttendanceController::class, 'apiValidateGeoLocation']);
+            Route::post('/setEarlyCheckoutReason', [AttendanceController::class, 'apiSetEarlyCheckoutReason']);
+        });
+    });
+
     // Orders API
     Route::apiResource('orders', OrderController::class);
 
