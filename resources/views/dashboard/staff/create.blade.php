@@ -10,12 +10,12 @@
     </div>
 
     {{-- View List Buttons --}}
-    <a href="{{ route('dashboard.staff') }}"
+    <a href="{{ route('dashboard.staff.management') }}"
        class="bg-red-400 hidden sm:flex items-center hover:bg-red-600 text-white px-4 py-2 rounded-md">
       <i class="ti ti-list mr-2"></i>
       View List
     </a>
-    <a href="{{ route('dashboard.staff') }}"
+    <a href="{{ route('dashboard.staff.management') }}"
        class="bg-red-400 sm:hidden hover:bg-red-600 text-white px-3 py-2 rounded-md">
       <i class="ti ti-list"></i>
     </a>

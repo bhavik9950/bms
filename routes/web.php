@@ -14,13 +14,22 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Main Dashboard
+// Main Dashboard - redirects based on role
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Orders under dashboard
-Route::prefix('dashboard')->middleware(['auth', 'verified'])->group(function () {
+// Role-specific dashboards
+Route::get('/dashboard/admin', [DashboardController::class, 'admin'])
+    ->middleware(['auth', 'verified', 'role:admin'])
+    ->name('dashboard.admin');
+
+Route::get('/dashboard/staff/dashboard', [StaffController::class, 'dashboard'])
+    ->middleware(['auth', 'verified', 'role:staff'])
+    ->name('dashboard.staff.dashboard');
+
+// Orders under dashboard - admin only
+Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('orders', OrderController::class)->names([
         'index' => 'dashboard.orders',
         'create' => 'dashboard.orders.create',
@@ -33,10 +42,10 @@ Route::prefix('dashboard')->middleware(['auth', 'verified'])->group(function () 
 });
 
 
-// Master routes
-Route::prefix('dashboard')->middleware(['auth', 'verified'])->group(function () {
+// Master routes - admin only
+Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('masters', MasterController::class)
-        ->except(['show']) 
+        ->except(['show'])
         ->names([
             'index'   => 'dashboard.masters',
             'create'  => 'dashboard.masters.create',
@@ -50,7 +59,7 @@ Route::prefix('dashboard')->middleware(['auth', 'verified'])->group(function () 
     Route::get('/masters/measurements', [MasterController::class, 'measurements'])
         ->name('dashboard.masters.measurements');
 
-    
+
     Route::post('/masters/import-garments', [MasterController::class, 'importGarments'])
     ->name('dashboard.masters.importGarments');
 
@@ -84,19 +93,23 @@ Route::prefix('dashboard/masters')->middleware(['auth', 'verified'])->group(func
     Route::delete('/delete-fabric/{id}', [FabricController::class, 'destroyFabric'])->name('dashboard.masters.destroyFabric');
 });
 
-// Staff routes
-Route::prefix('dashboard/staff')->middleware(['auth', 'verified'])->group(function () {
-    Route::get('/', [StaffController::class, 'index'])->name('dashboard.staff');
+// Staff management routes - admin only
+Route::prefix('dashboard/staff')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('/', [StaffController::class, 'index'])->name('dashboard.staff.management');
     Route::get('/create', [StaffController::class, 'create'])->name('dashboard.staff.create');
       Route::get('/edit/{id}', [StaffController::class, 'edit'])->name('dashboard.staff.edit');
     Route::put('/edit/{id}', [StaffController::class, 'update'])->name('dashboard.staff.update');
     Route::post('/store', [StaffController::class, 'store'])->name('dashboard.staff.store');
     Route::delete('/delete/{id}', [StaffController::class, 'destroy'])->name('dashboard.staff.destroy');
-   Route::get('/salary', [SalaryController::class, 'index'])->name('dashboard.staff.salary');
-   Route::get('/salary/{id}', [SalaryController::class, 'show'])->name('dashboard.staff.salary.view');
+    Route::get('/salary', [SalaryController::class, 'index'])->name('dashboard.staff.salary');
+    Route::get('/salary/{id}', [SalaryController::class, 'show'])->name('dashboard.staff.salary.view');
+
+    // Enhanced staff management routes
+    Route::patch('/{id}/toggle-status', [StaffController::class, 'toggleStatus'])->name('dashboard.staff.toggle-status');
+    Route::post('/{id}/send-credentials', [StaffController::class, 'sendCredentials'])->name('dashboard.staff.send-credentials');
 });
 
-// Attendance routes
+// Attendance routes - admin and staff
 Route::prefix('dashboard/attendance')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [AttendanceController::class, 'index'])->name('dashboard.attendance.index');
     Route::get('/mark', [AttendanceController::class, 'mark'])->name('dashboard.attendance.mark');
@@ -111,8 +124,17 @@ Route::prefix('dashboard/attendance')->middleware(['auth', 'verified'])->group(f
     Route::get('/earlyCheckout', [AttendanceController::class, 'earlyCheckout'])->name('dashboard.attendance.earlyCheckout');
 });
 
-// Roles management routes
-Route::prefix('dashboard/roles')->middleware(['auth', 'verified'])->group(function () {
+// Staff-specific attendance routes
+Route::prefix('dashboard/staff')->middleware(['auth', 'verified', 'role:staff'])->group(function () {
+    Route::get('/attendance', [StaffController::class, 'attendance'])->name('dashboard.staff.attendance');
+    Route::post('/attendance', [StaffController::class, 'attendance'])->name('dashboard.staff.attendance.action');
+    Route::get('/salary', [StaffController::class, 'salary'])->name('dashboard.staff.salary');
+    Route::get('/profile', [StaffController::class, 'profile'])->name('dashboard.staff.profile');
+    Route::post('/profile', [StaffController::class, 'profile'])->name('dashboard.staff.profile.update');
+});
+
+// Roles management routes - admin only
+Route::prefix('dashboard/roles')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('dashboard.roles');
     Route::post('/import-roles', [RoleController::class, 'import'])->name('dashboard.roles.import');
     Route::post('/create', [RoleController::class, 'store'])->name('dashboard.roles.store');

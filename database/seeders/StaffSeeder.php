@@ -15,7 +15,7 @@ class StaffSeeder extends Seeder
         $stitcherRole = \App\Models\StaffRole::where('role', 'Stitcher')->first();
         $designerRole = \App\Models\StaffRole::where('role', 'Designer')->first();
         $helperRole = \App\Models\StaffRole::where('role', 'Helper')->first();
-
+        
         $staffMembers = [
             [
                 'full_name' => 'John Doe',

@@ -12,12 +12,12 @@
     </div>
 
     {{-- View List Buttons --}}
-    <a href="{{ route('dashboard.staff') }}"
+    <a href="{{ route('dashboard.staff.management') }}"
        class="bg-red-400 hidden sm:flex items-center hover:bg-red-600 text-white px-4 py-2 rounded-md">
       <i class="ti ti-list mr-2"></i>
       View List
     </a>
-    <a href="{{ route('dashboard.staff') }}"
+    <a href="{{ route('dashboard.staff.management') }}"
        class="bg-red-400 sm:hidden hover:bg-red-600 text-white px-3 py-2 rounded-md">
       <i class="ti ti-list"></i>
     </a>
@@ -142,6 +142,31 @@
 
           <!-- ✅ FIX 3: Added status field (hidden, defaults to 1 for active) -->
           <input type="hidden" name="status" value="1">
+
+          <!-- Password field for editing staff login credentials -->
+          <div class="md:col-span-2">
+            <label for="password" class="block text-sm font-medium text-gray-700">Password (leave blank to keep current)</label>
+            <div class="relative">
+              <input type="password" id="password" name="password"
+                     placeholder="Enter new password"
+                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 sm:text-sm p-2 pr-10">
+              <i id="togglePassword"
+                 class="fa-solid fa-eye-slash absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500 pt-2"></i>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Leave blank if you don't want to change the password</p>
+          </div>
+
+          <!-- Password confirmation field -->
+          <div class="md:col-span-2">
+            <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <div class="relative">
+              <input type="password" id="password_confirmation" name="password_confirmation"
+                     placeholder="Confirm new password"
+                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 sm:text-sm p-2 pr-10">
+              <i id="togglePasswordConfirm"
+                 class="fa-solid fa-eye-slash absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500 pt-2"></i>
+            </div>
+          </div>
         </div>
 
         <h2 class="text-lg font-semibold mt-4 mb-4 flex items-center">Documents</h2>

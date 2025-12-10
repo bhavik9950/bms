@@ -50,6 +50,66 @@ class User extends Authenticatable
         return $this->role === $role;
     }
 
+    public function hasAuthRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    public function hasAdminAccess(): bool
+    {
+        return in_array($this->role, ['admin', 'technical_admin']);
+    }
+
+    /**
+     * Get user's job function role (if staff)
+     */
+    public function getJobRole()
+    {
+        if ($this->isStaff()) {
+            $staff = $this->getStaffRecord();
+            return $staff ? $staff->role : null;
+        }
+        return null;
+    }
+
+    /**
+     * Get staff record for staff users
+     */
+    public function getStaffRecord()
+    {
+        if ($this->isStaff()) {
+            // Find staff by matching email or staff_code pattern
+            return Staff::where('email', $this->email)
+                       ->orWhere('staff_code', str_replace('@staff.local', '', $this->email))
+                       ->first();
+        }
+        return null;
+    }
+
+    /**
+     * Find user by email or staff code (for dual login)
+     */
+    public static function findByIdentifier(string $identifier): ?self
+    {
+        // First try to find by email
+        $user = self::where('email', $identifier)->first();
+
+        // If not found, try to find staff user by staff_code
+        if (!$user) {
+            $staff = Staff::where('staff_code', $identifier)->first();
+            if ($staff) {
+                // Find user with matching email or staff-generated email
+                $user = self::where('role', 'staff')
+                           ->where(function($query) use ($staff) {
+                               $query->where('email', $staff->email)
+                                     ->orWhere('email', $staff->staff_code . '@staff.local');
+                           })
+                           ->first();
+            }
+        }
+
+        return $user;
+    }
 
     /**
      * The attributes that should be hidden for serialization.

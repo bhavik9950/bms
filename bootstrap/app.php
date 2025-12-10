@@ -15,8 +15,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
     // CORS middleware for cross-origin requests from mobile apps
     $middleware->alias([
         'cors' => \Illuminate\Http\Middleware\HandleCors::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
     ]);
-    
+
     // Apply CORS to API routes
     $middleware->api(prepend: [
         \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,

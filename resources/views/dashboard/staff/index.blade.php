@@ -122,18 +122,46 @@
     @endif
 </td>
 
-      <td class="px-6 py-4 text-center">
-        <button onclick='editStaff(@json($s))'
-            class="text-white btn bg-green-500 hover:bg-green-600 rounded-lg px-5 border-none">
-            <i class="ti ti-edit"></i>
-        </button>
-       <button data-id="{{ $s->id }}" 
-        onclick="deleteStaff('{{ $s->id }}')" 
-        class="text-white delete-staff-btn btn bg-red-500 hover:bg-red-700 rounded-lg px-5 ml-2 border-none">
-    <i class="ti ti-trash"></i>
-</button>
+     <td class="px-6 py-4 text-center">
+  <div class="relative" x-data="{ open: false }">
+    <button @click="open = !open" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+      <i class="ti ti-dots-vertical text-lg"></i>
+    </button>
 
-    </td>
+    <div x-show="open" @click.away="open = false" x-cloak
+         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+
+      <!-- Edit -->
+      <button onclick='editStaff(@json($s))'
+              class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        <i class="ti ti-edit mr-3 text-blue-500"></i>
+        Edit Staff
+      </button>
+
+      <!-- Toggle Status -->
+      <button onclick="toggleStaffStatus('{{ $s->id }}', {{ $s->status }})"
+              class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        <i class="ti ti-{{ $s->status ? 'x' : 'check' }} mr-3 {{ $s->status ? 'text-red-500' : 'text-green-500' }}"></i>
+        {{ $s->status ? 'Deactivate' : 'Activate' }}
+      </button>
+
+      <!-- Send Credentials -->
+      <button onclick="sendCredentials('{{ $s->id }}')"
+              class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        <i class="ti ti-mail mr-3 text-purple-500"></i>
+        Send Credentials
+      </button>
+
+      <!-- Delete -->
+      <div class="border-t border-gray-200"></div>
+      <button data-id="{{ $s->id }}" onclick="deleteStaff('{{ $s->id }}')"
+              class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+        <i class="ti ti-trash mr-3"></i>
+        Delete Staff
+      </button>     
+    </div>
+  </div>
+</td>
 </tr>
 @endforeach
 

@@ -3,21 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    // render dashboard
+    // render dashboard - redirects based on role
     public function index(Request $request)
     {
+        $user = Auth::user();
+
+        if (in_array($user->role, ['admin', 'technical_admin'])) {
+            return redirect()->route('dashboard.admin');
+        }
+
+        return redirect()->route('dashboard.staff.dashboard');
+    }
+
+    // Admin dashboard
+    public function admin(Request $request)
+    {
         if ($request->wantsJson()) {
-            // API response - return dashboard data
-            // You can implement aggregation of statistics here
             return response()->json([
-                'message' => 'Dashboard API endpoint - implement based on your requirements'
+                'message' => 'Admin Dashboard API endpoint'
             ]);
         }
-        
-        // Web response
+
         return view('dashboard.index');
     }
 }

@@ -31,19 +31,47 @@
 
     <!-- Body -->
     <nav x-data="{ openDropdown: null }" class="h-full overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 space-y-2 p-4">
+      <!-- Dashboard - accessible to all authenticated users -->
       <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('dashboard') ? 'text-green-600' : 'text-black' }}">
         <i class="ti ti-layout-dashboard mr-2 text-xl"></i>
         <span>Dashboard</span>
       </a>
+
+      <!-- Staff-specific menu items -->
+      @if(auth()->user()->role === 'staff')
+      <a href="{{ route('dashboard.staff.attendance') }}" class="flex items-center px-4 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('dashboard.staff.attendance') ? 'text-green-600' : 'text-black' }}">
+        <i class="ti ti-clock mr-2 text-xl"></i>
+        <span>My Attendance</span>
+      </a>
+
+      <a href="{{ route('dashboard.staff.salary') }}" class="flex items-center px-4 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('dashboard.staff.salary') ? 'text-green-600' : 'text-black' }}">
+        <i class="ti ti-cash mr-2 text-xl"></i>
+        <span>My Salary</span>
+      </a>
+
+      <a href="{{ route('dashboard.staff.profile') }}" class="flex items-center px-4 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('dashboard.staff.profile') ? 'text-green-600' : 'text-black' }}">
+        <i class="ti ti-user mr-2 text-xl"></i>
+        <span>My Profile</span>
+      </a>
+      @endif
+
+      <!-- Orders - admin only -->
+      @if(\App\Helpers\PermissionHelper::canManageOrders())
       <a href="{{route('dashboard.orders')}}" class="flex items-center px-4 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('dashboard.orders*') ? 'text-green-600' : 'text-black' }}">
         <i class="ti ti-shopping-cart mr-2 text-xl"></i>
         <span>Orders</span>
       </a>
+      @endif
+
+      <!-- Tasks - admin only (for now) -->
+      @if(\App\Helpers\PermissionHelper::canManageOrders())
       <a href="#" class="flex items-center px-4 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('tasks') ? 'text-green-600' : 'text-black' }}">
         <i class="ti ti-checkbox mr-2 text-xl"></i>
         <span>Tasks</span>
       </a>
-      <!-- Inventory Dropdown -->
+      @endif
+      <!-- Inventory Dropdown - admin only -->
+      @if(\App\Helpers\PermissionHelper::canManageMasters())
       <div class="space-y-1">
         <button @click="openDropdown = openDropdown==='inventory' ? null : 'inventory'" class="flex items-center w-full px-4 py-2 rounded hover:bg-gray-100 focus:outline-none {{ request()->is('inventory*') ? 'text-green-600' : 'text-black' }}">
           <i class="ti ti-package mr-2 text-xl"></i>
@@ -58,23 +86,27 @@
           <a href="#" class="block py-1 hover:text-green-700"><i class="ti ti-alert-hexagon mr-2"></i>Low Stock Alerts</a>
         </div>
       </div>
-      <!-- Staff Dropdown -->
+      @endif
+      <!-- Staff Management Dropdown - admin only -->
+      @if(\App\Helpers\PermissionHelper::canManageStaff())
       <div class="space-y-1">
         <button @click="openDropdown = openDropdown==='staff' ? null : 'staff'" class="flex items-center w-full px-4 py-2 rounded hover:bg-gray-100 focus:outline-none {{ request()->is('staff*') ? 'text-green-600' : 'text-black' }}">
           <i class="ti ti-users mr-2 text-xl"></i>
-          <span>Staff</span>
+          <span>Staff Management</span>
           <svg :class="{'rotate-90': openDropdown==='staff'}" class="ml-auto h-4 w-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
         </button>
         <div x-show="openDropdown==='staff'" class="pl-8 space-y-1" x-cloak>
-          <a href="{{route('dashboard.staff')}}" class="block py-1 hover:text-green-700
-           {{ request()->routeIs('dashboard.staff') ? 'text-green-600 font-semibold' : 'text-black' }}"><i class="ti ti-users mr-2"></i>Staff List</a>
+          <a href="{{route('dashboard.staff.management')}}" class="block py-1 hover:text-green-700
+           {{ request()->routeIs('dashboard.staff.management') ? 'text-green-600 font-semibold' : 'text-black' }}"><i class="ti ti-users mr-2"></i>Staff List</a>
           <a href="{{route('dashboard.staff.create')}}" class="block py-1 hover:text-green-700
           {{request()->routeIs('dashboard.staff.create')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-user-plus mr-2"></i>Add new Staff</a>
           <a href="{{route('dashboard.staff.salary')}}" class="block py-1 hover:text-green-700
           {{request()->routeIs('dashboard.staff.salary')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-currency-rupee mr-2"></i>Salary Management</a>
         </div>
       </div>
-      <!-- Attendance Dropdown -->
+      @endif
+      <!-- Attendance Dropdown - admin and staff -->
+      @if(\App\Helpers\PermissionHelper::canAccessModule('attendance'))
       <div class="space-y-1">
         <button @click="openDropdown = openDropdown==='attendance' ? null : 'attendance'" class="flex items-center w-full px-4 py-2 rounded hover:bg-gray-100 focus:outline-none {{ request()->is('attendance*') ? 'text-green-600' : 'text-black' }}">
           <i class="ti ti-calendar mr-2 text-xl"></i>
@@ -82,6 +114,8 @@
           <svg :class="{'rotate-90': openDropdown==='attendance'}" class="ml-auto h-4 w-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
         </button>
         <div x-show="openDropdown==='attendance'" class="pl-8 space-y-1" x-cloak>
+          @if(auth()->user()->hasAdminAccess())
+          <!-- Admin attendance management -->
           <a href="{{ route('dashboard.attendance.index') }}" class="block py-1 hover:text-green-700
           {{request()->routeIs('dashboard.attendance.index')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-users mr-2"></i>Staff Attendance</a>
           <a href="{{ route('dashboard.attendance.mark') }}" class="block py-1 hover:text-green-700
@@ -90,25 +124,34 @@
           {{request()->routeIs('dashboard.attendance.date')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-calendar mr-2"></i>View by Date</a>
           <a href="{{ route('dashboard.attendance.monthly') }}" class="block py-1 hover:text-green-700
           {{request()->routeIs('dashboard.attendance.monthly')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-calendar-cog mr-2"></i>Monthly Summary</a>
+          @else
+          <!-- Staff attendance view -->
+          <a href="{{ route('dashboard.staff.attendance') }}" class="block py-1 hover:text-green-700
+          {{request()->routeIs('dashboard.staff.attendance')?'text-green-600 font-semibold':'text-black'}}"><i class="ti ti-clock mr-2"></i>My Attendance</a>
+          @endif
         </div>
       </div>
-      {{-- Roles --}}
+      @endif
+      {{-- Roles - admin only --}}
+      @if(\App\Helpers\PermissionHelper::canAccessModule('roles'))
       <a href="{{route('dashboard.roles')}}" class="flex items-center px-4 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('dashboard.roles*') ? 'text-green-600' : 'text-black' }}">
         <i class="ti ti-settings mr-2 text-xl"></i>
         <span>Role</span>
       </a>
-  {{-- Masters dropdown --}}
+      @endif
+  {{-- Masters dropdown - admin only --}}
+  @if(\App\Helpers\PermissionHelper::canManageMasters())
 <div x-data="{ openDropdown: '{{ request()->is('masters*') ? 'masters' : '' }}' }" class="space-y-1">
 
     {{-- Main button --}}
-    <button 
-        @click="openDropdown = openDropdown==='masters' ? null : 'masters'" 
-        class="flex items-center w-full px-4 py-2 rounded focus:outline-none 
+    <button
+        @click="openDropdown = openDropdown==='masters' ? null : 'masters'"
+        class="flex items-center w-full px-4 py-2 rounded focus:outline-none
         {{ request()->is('masters*') ? 'text-green-600 bg-gray-100' : 'text-black hover:bg-gray-100' }}">
-        
+
         <i class="ti ti-database mr-2 text-xl"></i>
         <span>Masters</span>
-        <svg :class="{'rotate-90': openDropdown==='masters'}" 
+        <svg :class="{'rotate-90': openDropdown==='masters'}"
              class="ml-auto h-4 w-4 transition-transform"
              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
              <path d="M9 5l7 7-7 7"/>
@@ -117,7 +160,7 @@
 
     {{-- Submenu --}}
     <div x-show="openDropdown==='masters'" x-cloak class="pl-8 space-y-1">
-        
+
         <a href="{{ route('dashboard.masters') }}"
            class="flex items-center py-2 rounded hover:bg-gray-100
            {{ request()->routeIs('dashboard.masters') ? 'text-green-600 font-semibold' : 'text-black' }}">
@@ -143,6 +186,7 @@
         </a>
     </div>
 </div>
+@endif
 
 
       <form method="POST" action="{{ route('logout') }}">
