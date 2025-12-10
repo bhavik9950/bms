@@ -11,7 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RelationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalaryController;
-
+use App\Http\Controllers\TaskController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -48,6 +48,24 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/validateGeoLocation', [AttendanceController::class, 'apiValidateGeoLocation']);
             Route::post('/setEarlyCheckoutReason', [AttendanceController::class, 'apiSetEarlyCheckoutReason']);
         });
+        Route::prefix('task')->group(function () {
+            Route::get('/GetAll', [TaskController::class, 'apiGetAllTasks']);
+            Route::post('/startTask', [TaskController::class, 'apiStartTask']);
+            Route::post('/completeTask', [TaskController::class, 'apiCompleteTask']);
+            Route::post('/holdTask', [TaskController::class, 'apiHoldTask']);
+            Route::post('/resumeTask', [TaskController::class, 'apiResumeTask']);
+            Route::get('/getTaskUpdates', [TaskController::class, 'apiGetTaskUpdates']);
+        });
+
+        // Authentication & User Management
+        Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'apiLogin']);
+        Route::get('/account/me', [App\Http\Controllers\UserController::class, 'me']);
+        Route::post('/user/updateStatus', [App\Http\Controllers\UserController::class, 'updateStatus']);
+
+        // Additional Required APIs
+        Route::get('/notification/getAll', [App\Http\Controllers\NotificationController::class, 'getAll']);
+        Route::get('/settings/getAppSettings', [App\Http\Controllers\SettingsController::class, 'getAppSettings']);
+        Route::get('/getDashboardData', [App\Http\Controllers\DashboardController::class, 'getDashboardData']);
     });
 
     // Orders API
