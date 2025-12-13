@@ -1,0 +1,29 @@
+# Compiled assets
+css/*.css
+js/*.js
+!css/.gitkeep
+!js/.gitkeep
+
+# Cache files
+.cache/
+*.cache
+temp/
+tmp/
+
+# Development files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

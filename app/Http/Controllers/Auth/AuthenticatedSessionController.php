@@ -31,6 +31,11 @@ class AuthenticatedSessionController extends Controller
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
+// POST /api/V1/login (for mobile app)
+public function apiLogin(Request $request){
+    
+}
+
     /**
      * Destroy an authenticated session.
      */

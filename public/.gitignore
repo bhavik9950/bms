@@ -1,0 +1,45 @@
+# User uploaded files
+storage/
+!storage/app/public/.gitkeep
+!storage/framework/.gitkeep
+!storage/logs/.gitkeep
+
+# Compiled/built assets that can be regenerated
+build/
+css/*.css
+js/*.js
+!css/.gitkeep
+!js/.gitkeep
+!build/manifest.json
+
+# Cache files
+.cache/
+*.cache
+*.tmp
+storage/framework/cache/*/
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Log files
+*.log
+storage/logs/*.log
+
+# Development files
+.DS_Store
+Thumbs.db
+.htaccess
+index.php
+robots.txt
+favicon.ico
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
